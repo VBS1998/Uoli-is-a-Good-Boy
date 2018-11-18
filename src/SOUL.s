@@ -9,6 +9,7 @@
 @@      Seção de Constantes/Defines           @@
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
+@ Constante para definição do tempo pra o incremento do contador
     .set TIME_SZ                    200
 
 @ Constantes para os Modos de operação do Processador, utilizados para trocar entre modos de operação (5 bits menos significativos)
@@ -23,6 +24,11 @@
 	.set STACK_POINTER_SUPERVISOR,	0x7F000000      @ Endereço inicial da pilha do modo Supervisor
 	.set STACK_POINTER_USER, 		0x80000000      @ Endereço inicial da pilha do modo Usuário
 
+@ Constantes referentes aos endereços dos registradores do GPIO
+    .set GPIO_DR                    0x53F84000      @ Endereço do registrador DR do GPIO
+    .set GPIO_GDIR                  0x53F84004      @ Endereço do registrador GDIR do GPIO
+    .set GPIO_PSR                   0x53F84008      @ Endereço do registrador PSR do GPIO
+
 @ Constantes Referentes ao TZIC
     .set TZIC_BASE,                 0x0FFFC000
     .set TZIC_INTCTRL,              0x00
@@ -30,7 +36,6 @@
     .set TZIC_ENSET1,               0x104
     .set TZIC_PRIOMASK,             0x0C
     .set TZIC_PRIORITY9,            0x424
-
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @@      Seção do Vetor de Interrupções        @@
@@ -105,7 +110,6 @@ reset_handler:
 
 
 @    3) ----------- Configuração dos periféricos (GPT/GPIO) -------------------
-    @ Você pode configurar os periféricos aqui....
 
     @Escrever 0x41 no GPT_CR
     ldr r0, =0x53FA0000
@@ -126,6 +130,14 @@ reset_handler:
     ldr r0, =0x53FA000C
     mov r1, #1
     str r1, [r0]
+
+    @ Configuracao de entradas e saidas
+    ldr r0, =GPIO_GDIR
+    mov r1, 0b01111100000000000011111111111111
+
+    @ Inicializando o GPIO_DR
+
+
 
 
 @    4) ----------- Configuração do TZIC  -------------------------------------
@@ -177,7 +189,8 @@ svc_handler:
     cmp r7, #17
     bne set_t
     @-----Get time------
-
+        ldr r0, =contador
+        ldr r0, [r0]
         movs pc, lr
     @-------------------
 
@@ -185,7 +198,8 @@ svc_handler:
     cmp r7, #18
     bne set_m
     @-----Set time------
-
+        ldr r1, =contador
+        str r0, [r1]
         movs pc, lr
     @-------------------
 

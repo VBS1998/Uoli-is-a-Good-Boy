@@ -174,6 +174,40 @@ reset_handler:
 @   Esta rotina deve, determinar qual syscall foi realizada e realizar alguma ação (escrever nos motores, ler contador de tempo, ....)
 svc_handler:
 
+    cmp r7, #17
+    bne set_t
+    @-----Get time------
+
+        movs pc, lr
+    @-------------------
+
+    set_t:
+    cmp r7, #18
+    bne set_m
+    @-----Set time------
+
+        movs pc, lr
+    @-------------------
+
+    set_m:
+    cmp r7, #20
+    bne read_s
+    @-----Set motor-----
+
+        movs pc, lr
+    @-------------------
+
+    read_s:
+    cmp r7, #21
+    bne invalid_syscall_code
+    @-----Read sonar----
+
+        movs pc, lr
+    @-------------------
+
+    invalid_syscall_code:
+        movs pc, lr
+
 @   Rotina para o tratamento de interrupções IRQ
 @   Sempre que uma interrupção do tipo IRQ acontece, esta rotina é executada. O GPT, quando configurado, gera uma interrupção do tipo IRQ. Neste caso, o contador de tempo pode ser incrementado (este incremento corresponde a 1 unidade de tempo do seu sistema)
 irq_handler:

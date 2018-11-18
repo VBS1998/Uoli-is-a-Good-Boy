@@ -9,10 +9,12 @@
 @@      Seção de Constantes/Defines           @@
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
+    .set TIME_SZ                    200
+
 @ Constantes para os Modos de operação do Processador, utilizados para trocar entre modos de operação (5 bits menos significativos)
     .set MODE_USER,                 0x10
-    .set MODE_IRQ,                  0x11
-    .set MODE_SUPERVISOR,           0x12
+    .set MODE_IRQ,                  0x12
+    .set MODE_SUPERVISOR,           0x13
     .set MODE_SYSTEM,               0x1F
 
 @ Constantes referentes aos endereços
@@ -115,9 +117,9 @@ reset_handler:
     mov r1, #0x0
     str r1, [r0]
 
-    @200 no ocr1
+    @TIME_SZ no ocr1
     ldr r0, =0x53FA0010
-    mov r1, #200
+    mov r1, #TIME_SZ
     str r1, [r0]
 
     @1 no IR

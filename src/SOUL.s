@@ -11,10 +11,9 @@
 
 @ Constantes para os Modos de operação do Processador, utilizados para trocar entre modos de operação (5 bits menos significativos)
     .set MODE_USER,                 0x10
-    @ Você pode definir as outras....
-@    .set MODE_IRQ,                  0xxx
-@    .set MODE_SUPERVISOR,           0xxx
-@    .set MODE_SYSTEM,               0xxx
+    .set MODE_IRQ,                  0x11
+    .set MODE_SUPERVISOR,           0x12
+    .set MODE_SYSTEM,               0x1F
 
 @ Constantes referentes aos endereços
 	.set USER_ADDRESS,				0x77812000      @ Endereço do código de usuário
@@ -118,7 +117,7 @@ reset_handler:
 
     @200 no ocr1
     ldr r0, =0x53FA0010
-    mov r1, #100
+    mov r1, #200
     str r1, [r0]
 
     @1 no IR

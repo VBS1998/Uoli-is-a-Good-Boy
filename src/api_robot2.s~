@@ -6,7 +6,6 @@
 .globl set_time
 .globl get_time
 
-
 set_motor_speed:
 	push {r1,r2, r7, lr}
 	ldrb r2, [r0]		@ id do motor em r2
@@ -30,9 +29,13 @@ get_time:
 	svc 0x0				@ retorna o tempo e poe em r0
 	pop {r7, pc}
 
-
 set_time:
 	push {r7, lr}
 	mov r7, #18			@ codigo da syscall set_time
 	svc 0x0				@ seta o tempo com valor de r0
 	pop {r7, pc}
+	
+
+
+
+

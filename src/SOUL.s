@@ -254,25 +254,11 @@ svc_handler:
             ldr r0, =GPIO_DR
             str r1, [r0]
 
-        @---Escrever 0 no trigger----
-            and r1, r1, #0xBFFFFFFF
-            str r1, [r0]
+            bl atualiza
 
-        @---Delay 15ms---------------
-            ldr r2, =contador
-            ldr r2, [r2]
-            add r2, r2, #15000
-            primeiro_delay:
-            ldr r3, =contador
-            ldr r3, [r3]
-            cmp r2, r3
-            bgt primeiro_delay
-
-        @---Escrever 1 no trigger
-            or r1, r1, #0x40000000
-            str r1, [r0]
-
-
+            ldr r0, =GPIO_DR
+            ldr r1, [r0]
+            mov r0, r1, lsr #14
 
         movs pc, lr
     @-------------------
@@ -296,6 +282,65 @@ irq_handler:
 
     pop {r0, r1}
     movs pc, lr
+
+atualiza:
+    ldr r0, =GPIO_DR
+    ldr r1, [r0]
+    @---Escrever 0 no trigger----
+        and r1, r1, #0xBFFFFFFF
+        str r1, [r0]
+
+    @---Delay 15ms---------------
+        ldr r2, =contador
+        ldr r2, [r2]
+        add r2, r2, #15000
+        primeiro_delay:
+        ldr r3, =contador
+        ldr r3, [r3]
+        cmp r2, r3
+        bgt primeiro_delay
+
+    @---Escrever 1 no trigger
+        or r1, r1, #0x40000000
+        str r1, [r0]
+
+    @---Delay 15ms---------------
+        ldr r2, =contador
+        ldr r2, [r2]
+        add r2, r2, #15000
+        segundo_delay:
+        ldr r3, =contador
+        ldr r3, [r3]
+        cmp r2, r3
+        bgt segundo_delay
+
+    @---Escrever 0 no trigger----
+        and r1, r1, #0xBFFFFFFF
+        str r1, [r0]
+
+    @---Verificar Flag-----------
+        verifica_flag:
+            ldr r2, [r0]
+            mov r2, r2, lsr #31
+            cmp r2, #1
+            beq fim_atualiza
+    @---Delay 10ms---------------
+        ldr r2, =contador
+        ldr r2, [r2]
+        add r2, r2, #10000
+        terceiro_delay:
+        ldr r3, =contador
+        ldr r3, [r3]
+        cmp r2, r3
+        bgt terceiro_delay
+        b verifica_flag
+
+    fim_atualiza:
+        ldr r2, [r0]
+        mov r2, r2, lsl #1
+        mov r2, r2, lse #1
+        str r2, [r0]
+    mov pc, lr
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @@      Seção de Dados                        @@

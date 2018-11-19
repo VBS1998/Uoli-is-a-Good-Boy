@@ -10,7 +10,7 @@
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 @ Constante para definição do tempo pra o incremento do contador
-    .set TIME_SZ                    200
+    .set TIME_SZ,                    200
 
 @ Constantes para os Modos de operação do Processador, utilizados para trocar entre modos de operação (5 bits menos significativos)
     @ Valores para usar com FIQ/IRQ ativos
@@ -26,9 +26,9 @@
 	.set STACK_POINTER_USER, 		0x80000000      @ Endereço inicial da pilha do modo Usuário
 
 @ Constantes referentes aos endereços dos registradores do GPIO
-    .set GPIO_DR                    0x53F84000      @ Endereço do registrador DR do GPIO
-    .set GPIO_GDIR                  0x53F84004      @ Endereço do registrador GDIR do GPIO
-    .set GPIO_PSR                   0x53F84008      @ Endereço do registrador PSR do GPIO
+    .set GPIO_DR,                    0x53F84000      @ Endereço do registrador DR do GPIO
+    .set GPIO_GDIR,                  0x53F84004      @ Endereço do registrador GDIR do GPIO
+    .set GPIO_PSR,                  0x53F84008      @ Endereço do registrador PSR do GPIO
 
 @ Constantes Referentes ao TZIC
     .set TZIC_BASE,                 0x0FFFC000
@@ -134,7 +134,7 @@ reset_handler:
 
     @ Configuracao de entradas e saidas
     ldr r0, =GPIO_GDIR
-    mov r1, #0b01111100000000000011111111111111
+    mov r1, #0b01111100000000000011111111111111 @@trocar por ldr algo (nem lembro)
     str r1, [r0]
 
     @ Inicializando o GPIO_DR
@@ -255,7 +255,7 @@ svc_handler:
             ldr r1, [r1] @ Em r1 temos o numero de dr a ter os bits do mux alterados
 
             orr r1, r0, r1 @ É feito um OR entre os dois numeros (mantem os bits de r1 que nao sao do mux)
-            eor r0, r0, 1  @ XOR com 1 na mascara para barrar todos os bits (a xor 1 equivale a not a)
+            eor r0, r0, #1  @ XOR com 1 na mascara para barrar todos os bits (a xor 1 equivale a not a)
 
             mov r0, r0, lsr #26
             mov r0, r0, lsl #28

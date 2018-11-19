@@ -133,10 +133,13 @@ reset_handler:
 
     @ Configuracao de entradas e saidas
     ldr r0, =GPIO_GDIR
-    mov r1, 0b01111100000000000011111111111111
+    mov r1, #0b01111100000000000011111111111111
+    str r1, [r0]
 
     @ Inicializando o GPIO_DR
-
+    ldr r0, =GPIO_DR
+    mov r1, #0x0
+    str r1, [r0]
 
 
 
@@ -215,6 +218,44 @@ svc_handler:
     cmp r7, #21
     bne invalid_syscall_code
     @-----Read sonar----
+        @---Escrever o ID no MUX---
+            mov r0, r0, lsl #26 @ Em r0 temos uma mascara com os bits do id
+            ldr r1, =GPIO_DR
+            ldr r1, [r1] @ Em r1 temos o numero de dr a ter os bits do mux alterados
+
+            orr r1, r0, r1 @ É feito um OR entre os dois numeros (mantem os bits de r1 que nao sao do mux)
+            eor r0, r0, 1  @ XOR com 1 na mascara para barrar todos os bits (a xor 1 equivale a not a)
+
+            mov r0, r0, lsr #26
+            mov r0, r0, lsl #28
+            mov r0, r0, lsr #2  @ Zera os bits da mascara que nao vao pro mux
+
+            eor r1, r0, r1  @ XOR da nova mascara com o resultado do primeiro OR
+
+            @ As operacoes vao fazer com que exatamente os 4 bits de id sejam escritos nos bits de mux sem alterar o resto.
+
+            ldr r0, =GPIO_DR
+            str r1, [r0]
+
+        @---Escrever 0 no trigger----
+            and r1, r1, #0xBFFFFFFF
+            str r1, [r0]
+
+        @---Delay 15ms---------------
+            ldr r2, =contador
+            ldr r2, [r2]
+            add r2, r2, #15000
+            primeiro_delay:
+            ldr r3, =contador
+            ldr r3, [r3]
+            cmp r2, r3
+            bgt primeiro_delay
+
+        @---Escrever 1 no trigger
+            or r1, r1, #0x40000000
+            str r1, [r0]
+
+
 
         movs pc, lr
     @-------------------

@@ -210,6 +210,23 @@ svc_handler:
     cmp r7, #20
     bne read_s
     @-----Set motor-----
+		cmp r0, #0						@ if (r0 == 0)
+		beq motor0						@ setar motor0
+		cmp r0, #1						@ else if (r0 == 1)
+		beq motor1						@ setar motor1
+		mov r0, #-1						@ else
+		b fim_setar_motor				@ motor invalido
+		
+		motor0:
+			cmp r1, #63
+			b
+			mov r1, r1, lsl #7			@ escreve em r1 os bits correspondentes a velocidade
+			orr r1, r1, #0b1000000		@ escreve 1 no bit motor1_write (pra nao modificar a velocidade dele)
+			ldr r0, =GPIO_DR
+			str r1, [r0]				@ GPIO_DR = r1
+			
+		motor1:
+		fim_setar_motor:
 
         movs pc, lr
     @-------------------

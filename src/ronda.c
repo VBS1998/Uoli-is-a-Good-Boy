@@ -15,8 +15,8 @@ int _start(){
             motor->id = 1;
             motor->speed = 30;
             set_motor_speed(motor);
-
-            while(get_time() < t*1000){
+            while(get_time() < t*250){ //com t*250, usamos a unidade de tempo como 0,25 segundos
+                
             }
 
         }

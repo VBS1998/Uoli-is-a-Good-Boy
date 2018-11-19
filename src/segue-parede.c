@@ -24,6 +24,8 @@ int main() {
 
 }
 
+
+
 void busca-parede(motor_cfg_t *motor0, motor_cfg_t *motor1, int *sonarDistances) {
 
 	motor0->speed = NORMALSPEED;
@@ -40,6 +42,7 @@ void busca-parede(motor_cfg_t *motor0, motor_cfg_t *motor1, int *sonarDistances)
 }
 
 
+
 void segue-parede(motor_cfg_t *motor0, motor_cfg_t *motor1, int *sonarDistances) {
 
 	int distanciaIdeal = read_sonar(7);	// sonar a direita do Uoli
@@ -48,11 +51,13 @@ void segue-parede(motor_cfg_t *motor0, motor_cfg_t *motor1, int *sonarDistances)
 
 	while (1) {
 		if (read_sonar(3) < LIMIAR) {
-			// evitar colisao
+			// implementar meio de evitar colisao
 		}
 		distanciaAtual = read_sonar(7);
 		if (distanciaAtual > (distanciaIdeal + 100)) {
-			
+			// aproximar da parede
+		} else if (distanciaAtual < (distanciaIdeal - 100)) {
+			// afastar da parede
 		}
 		
 	} 
@@ -108,19 +113,4 @@ int acharSonarMaisProximo (int *array, int size) {
 	return min;
 
 } 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

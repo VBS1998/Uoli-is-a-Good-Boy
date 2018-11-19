@@ -210,22 +210,36 @@ svc_handler:
     cmp r7, #20
     bne read_s
     @-----Set motor-----
-		cmp r0, #0						@ if (r0 == 0)
-		beq motor0						@ setar motor0
-		cmp r0, #1						@ else if (r0 == 1)
-		beq motor1						@ setar motor1
-		mov r0, #-1						@ else
-		b fim_setar_motor				@ motor invalido
+		cmp r0, #0							@ if (r0 == 0)
+		beq motor0							@ setar motor0
+		cmp r0, #1							@ else if (r0 == 1)
+		beq motor1							@ setar motor1
+		mov r0, #-1							@ else
+		b fim_setar_motor					@ motor invalido
 		
 		motor0:
-			cmp r1, #63
-			b
-			mov r1, r1, lsl #7			@ escreve em r1 os bits correspondentes a velocidade
-			orr r1, r1, #0b1000000		@ escreve 1 no bit motor1_write (pra nao modificar a velocidade dele)
+			cmp r1, #63						@ if (r1 > 63)
+			movgt r0, #-2					@ velocidade invalida
+			bgt fim_setar_motor
+
+			mov r1, r1, lsl #7				@ escreve em r1 os bits correspondentes a velocidade
+			orr r1, r1, #0b1000000			@ escreve 1 no bit motor1_write (pra nao modificar a velocidade dele)
 			ldr r0, =GPIO_DR
-			str r1, [r0]				@ GPIO_DR = r1
+			str r1, [r0]					@ GPIO_DR = r1
+			mov r0, #0
+			b fim_setar_motor
 			
 		motor1:
+			cmp r1, #63						@ if (r1 > 63)
+			movgt r0, #-2					@ velocidade invalida
+			bgt fim_setar_motor
+
+			orr r1, r1, #0b10000000000000	@ escreve 1 no bit motor0_write (pra nao modificar a velocidade dele)
+			ldr r0, =GPIO_DR
+			str r1, [r0]					@ GPIO_DR = r1
+			mov r0, #0
+			b fim_setar_motor
+
 		fim_setar_motor:
 
         movs pc, lr
@@ -301,7 +315,7 @@ atualiza:
         bgt primeiro_delay
 
     @---Escrever 1 no trigger
-        or r1, r1, #0x40000000
+        orr r1, r1, #0x40000000
         str r1, [r0]
 
     @---Delay 15ms---------------
@@ -338,7 +352,7 @@ atualiza:
     fim_atualiza:
         ldr r2, [r0]
         mov r2, r2, lsl #1
-        mov r2, r2, lse #1
+        mov r2, r2, lsr #1
         str r2, [r0]
     mov pc, lr
 

@@ -2,7 +2,14 @@
 #include "api_robot2.h"
 
 #define LIMIAR 1200				// decidir bons valores para o
-#define NORMALSPEED 30			// limiar e velocidade padrao
+#define NORMALSPEED 30			// limiar, velocidade padrao,
+#define TOLERANCIA_DIST 100		// tolerancia da distancia a parede,
+#define TEMPO_CURVA 100			// e tempo de curva
+
+void busca_parede(motor_cfg_t *motor0, motor_cfg_t *motor1, int *sonarDistances);
+void segue_parede(motor_cfg_t *motor0, motor_cfg_t *motor1, int *sonarDistances);
+void ajustar_posicao(motor_cfg_t *motor0, motor_cfg_t *motor1, int *sonarDistances);
+int acharSonarMaisProximo (int *array, int size);
 
 int main() {
 
@@ -13,8 +20,8 @@ int main() {
 	motor0->id = 0;
 	motor1->id = 1;
 
-	busca-parede(motor0, motor1, sonarDistances);
-	segue-parede(motor0, motor1, sonarDistances);
+	busca_parede(motor0, motor1, sonarDistances);
+	segue_parede(motor0, motor1, sonarDistances);
 
 	free(motor0);
 	free(motor1);
@@ -26,7 +33,7 @@ int main() {
 
 
 
-void busca-parede(motor_cfg_t *motor0, motor_cfg_t *motor1, int *sonarDistances) {
+void busca_parede(motor_cfg_t *motor0, motor_cfg_t *motor1, int *sonarDistances) {
 
 	motor0->speed = NORMALSPEED;
 	motor1->speed = NORMALSPEED;
@@ -37,26 +44,34 @@ void busca-parede(motor_cfg_t *motor0, motor_cfg_t *motor1, int *sonarDistances)
 		// Uoli deve seguir em frente ate encontrar um obstaculo
 	}
 
-	ajutar-posicao(motor0, motor1, sonarDistances);
+	ajutar_posicao(motor0, motor1, sonarDistances);
 
 }
 
 
 
-void segue-parede(motor_cfg_t *motor0, motor_cfg_t *motor1, int *sonarDistances) {
+void segue_parede(motor_cfg_t *motor0, motor_cfg_t *motor1, int *sonarDistances) {
 
 	int distanciaIdeal = read_sonar(7);	// sonar a direita do Uoli
 	int distanciaAtual;
 
 
 	while (1) {
-		if (read_sonar(3) < LIMIAR) {
-			// implementar meio de evitar colisao
+		if (read_sonar(3) < LIMIAR) {				// evitar colisao frontal
+			set_time(0);							// nao sei se isso funciona hahaha
+			motor1->speed = 0;						// pode mudar se ce achar que ta mto porco
+			set_motor_speed(motor1);
+			while (get_time() < TEMPO_CURVA) {
+				// esperar o tempo de curva
+			}
+			motor1->speed = NORMALSPEED;
+			set_motor_speed(motor1);
+			continue;
 		}
 		distanciaAtual = read_sonar(7);
-		if (distanciaAtual > (distanciaIdeal + 100)) {
+		if (distanciaAtual > (distanciaIdeal + TOLERANCIA_DIST)) {
 			// aproximar da parede
-		} else if (distanciaAtual < (distanciaIdeal - 100)) {
+		} else if (distanciaAtual < (distanciaIdeal - TOLERANCIA_DIST)) {
 			// afastar da parede
 		}
 		
@@ -71,14 +86,14 @@ void segue-parede(motor_cfg_t *motor0, motor_cfg_t *motor1, int *sonarDistances)
  * a velocidade dos motores ao normal no final da funcao para que ele siga a parede.
  */
 
-void ajustar-posicao(motor_cfg_t *motor0, motor_cfg_t *motor1, int *sonarDistances) {
+void ajustar_posicao(motor_cfg_t *motor0, motor_cfg_t *motor1, int *sonarDistances) {
 
 	int closestSonar;
 
 	motor0->speed = 10;
 	motor1->speed = 0;
 	set_motor_speed(motor0);			// velocidade ajustada para
-	set_motor_speed(motor1);			// curva a direita
+	set_motor_speed(motor1);			// curva a esquerda
 
 	do {
 		closestSonar = acharSonarMaisProximo(sonarDistances, 16);

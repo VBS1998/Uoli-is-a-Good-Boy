@@ -13,6 +13,7 @@
     .set TIME_SZ                    200
 
 @ Constantes para os Modos de operação do Processador, utilizados para trocar entre modos de operação (5 bits menos significativos)
+    @ Valores para usar com FIQ/IRQ ativos
     .set MODE_USER,                 0x10
     .set MODE_IRQ,                  0x12
     .set MODE_SUPERVISOR,           0x13
@@ -179,10 +180,9 @@ reset_handler:
 
 @    5) ----------- Execução de código de usuário -----------------------------
     @ Você pode fazer isso aqui....
-    msr  CPSR_c,  #0x13   @ SUPERVISOR mode, IRQ/FIQ enabled
-    loop:
-        b loop
-
+    msr CPSR_c,  #MODE_USER   @ USER mode, IRQ/FIQ enabled
+    mov sp, #STACK_POINTER_USER
+    mov pc, #USER_ADDRESS
 
 @   Rotina para o tratamento de chamadas de sistemas, feitas pelo usuário
 @   As funções na camada BiCo fazem syscalls que são tratadas por essa rotina
@@ -216,7 +216,7 @@ svc_handler:
 		beq motor1							@ setar motor1
 		mov r0, #-1							@ else
 		b fim_setar_motor					@ motor invalido
-		
+
 		motor0:
 			cmp r1, #63						@ if (r1 > 63)
 			movgt r0, #-2					@ velocidade invalida
@@ -228,7 +228,7 @@ svc_handler:
 			str r1, [r0]					@ GPIO_DR = r1
 			mov r0, #0
 			b fim_setar_motor
-			
+
 		motor1:
 			cmp r1, #63						@ if (r1 > 63)
 			movgt r0, #-2					@ velocidade invalida

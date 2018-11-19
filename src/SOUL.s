@@ -249,22 +249,18 @@ svc_handler:
     cmp r7, #21
     bne invalid_syscall_code
     @-----Read sonar----
+        cmp r0, #15
+        ble id_valido
+        mov r0, #-1
+        b fim_read_sonar
+
+        id_valido:
         @---Escrever o ID no MUX---
-            mov r0, r0, lsl #26 @ Em r0 temos uma mascara com os bits do id
+            mov r0, r0, lsl #26 @ Deixa tudo 0, menos os bits que vao para sonar_mux
             ldr r1, =GPIO_DR
-            ldr r1, [r1] @ Em r1 temos o numero de dr a ter os bits do mux alterados
+            str r0, [r1]
 
-            orr r1, r0, r1 @ É feito um OR entre os dois numeros (mantem os bits de r1 que nao sao do mux)
-            eor r0, r0, #1  @ XOR com 1 na mascara para barrar todos os bits (a xor 1 equivale a not a)
-
-            mov r0, r0, lsr #26
-            mov r0, r0, lsl #28
-            mov r0, r0, lsr #2  @ Zera os bits da mascara que nao vao pro mux
-
-            eor r1, r0, r1  @ XOR da nova mascara com o resultado do primeiro OR
-
-            @ As operacoes vao fazer com que exatamente os 4 bits de id sejam escritos nos bits de mux sem alterar o resto.
-
+        @---Realiza a leitura------
             ldr r0, =GPIO_DR
             str r1, [r0]
 
@@ -272,7 +268,10 @@ svc_handler:
 
             ldr r0, =GPIO_DR
             ldr r1, [r0]
-            mov r0, r1, lsr #14
+            mov r1, r1, lsl #6
+            mov r0, r1, lsr #20
+
+        fim_read_sonar:
 
         movs pc, lr
     @-------------------

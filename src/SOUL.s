@@ -257,6 +257,7 @@ svc_handler:
         id_valido:
         @---Escrever o ID no MUX---
             mov r0, r0, lsl #26 @ Deixa tudo 0, menos os bits que vao para sonar_mux
+            orr r0, r0, #0b10000001000000 @ Coloca 1 nos motor write para nao mudar a velocidade deles
             ldr r1, =GPIO_DR
             str r0, [r1]
 

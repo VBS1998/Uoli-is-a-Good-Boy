@@ -1,0 +1,8 @@
+compile:
+	arm-eabi-as SOUL.s -o SOUL.o
+	arm-eabi-as api_robot2.s -o api_robot2.o
+	gcc segue-parede.c -S -o segue-parede.s
+	arm-eabi-as segue-parede.s -o segue-parede.o
+	arm-eabi-ld SOUL.o -o SOUL --section-start=.iv=0x778005e0 -Ttext=0x77800700 -Tdata=0x77801800 -e 0x778005e0
+	arm-eabi-ld api_robot2.o segue-parede.o -o segue-parede -Tdata=0x77803000
+	mksd.sh --so SOUL --user segue-parede

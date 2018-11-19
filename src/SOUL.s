@@ -134,7 +134,7 @@ reset_handler:
 
     @ Configuracao de entradas e saidas
     ldr r0, =GPIO_GDIR
-    mov r1, #0b01111100000000000011111111111111 @@trocar por ldr algo (nem lembro)
+    ldr r1, =0b01111100000000000011111111111111
     str r1, [r0]
 
     @ Inicializando o GPIO_DR
@@ -182,7 +182,7 @@ reset_handler:
     @ Você pode fazer isso aqui....
     msr CPSR_c,  #MODE_USER   @ USER mode, IRQ/FIQ enabled
     mov sp, #STACK_POINTER_USER
-    mov pc, #USER_ADDRESS
+    ldr pc, =USER_ADDRESS
 
 @   Rotina para o tratamento de chamadas de sistemas, feitas pelo usuário
 @   As funções na camada BiCo fazem syscalls que são tratadas por essa rotina
@@ -307,7 +307,8 @@ atualiza:
     @---Delay 15ms---------------
         ldr r2, =contador
         ldr r2, [r2]
-        add r2, r2, #15000
+        ldr r3, =15000
+        add r2, r2, r3
         primeiro_delay:
         ldr r3, =contador
         ldr r3, [r3]
@@ -321,7 +322,8 @@ atualiza:
     @---Delay 15ms---------------
         ldr r2, =contador
         ldr r2, [r2]
-        add r2, r2, #15000
+        ldr r3, =15000
+        add r2, r2, r3
         segundo_delay:
         ldr r3, =contador
         ldr r3, [r3]
@@ -341,7 +343,8 @@ atualiza:
     @---Delay 10ms---------------
         ldr r2, =contador
         ldr r2, [r2]
-        add r2, r2, #10000
+        ldr r3, =10000
+        add r2, r2, r3
         terceiro_delay:
         ldr r3, =contador
         ldr r3, [r3]

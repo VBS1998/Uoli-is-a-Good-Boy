@@ -307,7 +307,7 @@ atualiza:
     @---Delay 15ms---------------
         ldr r2, =contador
         ldr r2, [r2]
-        ldr r3, =15000
+        ldr r3, =15
         add r2, r2, r3
         primeiro_delay:
         ldr r3, =contador
@@ -322,7 +322,7 @@ atualiza:
     @---Delay 15ms---------------
         ldr r2, =contador
         ldr r2, [r2]
-        ldr r3, =15000
+        ldr r3, =15
         add r2, r2, r3
         segundo_delay:
         ldr r3, =contador
@@ -343,7 +343,7 @@ atualiza:
     @---Delay 10ms---------------
         ldr r2, =contador
         ldr r2, [r2]
-        ldr r3, =10000
+        ldr r3, =10
         add r2, r2, r3
         terceiro_delay:
         ldr r3, =contador

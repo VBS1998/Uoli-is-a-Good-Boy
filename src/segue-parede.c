@@ -71,11 +71,19 @@ void segue_parede(motor_cfg_t *motor0, motor_cfg_t *motor1, int *sonarDistances)
 		distanciaAtual = read_sonar(7);
 		if (distanciaAtual > (distanciaIdeal + TOLERANCIA_DIST)) {
 			// aproximar da parede
+			while(distanciaAtual > (distanciaIdeal + TOLERANCIA_DIST)){
+				motor0->speed = 0;
+				set_motor_speed(motor0);
+			}
 		} else if (distanciaAtual < (distanciaIdeal - TOLERANCIA_DIST)) {
 			// afastar da parede
+			while(distanciaAtual > (distanciaIdeal - TOLERANCIA_DIST)){
+				motor1->speed = 0;
+				set_motor_speed(motor1);				
+			}
 		}
-		
-	} 
+
+	}
 
 }
 
@@ -127,5 +135,4 @@ int acharSonarMaisProximo (int *array, int size) {
 
 	return min;
 
-} 
-
+}

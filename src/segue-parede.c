@@ -11,7 +11,7 @@ void segue_parede(motor_cfg_t *motor0, motor_cfg_t *motor1, int *sonarDistances)
 void ajustar_posicao(motor_cfg_t *motor0, motor_cfg_t *motor1, int *sonarDistances);
 int acharSonarMaisProximo (int *array, int size);
 
-int main() {
+int _start() {
 
 	motor_cfg_t *motor0, *motor1;
 	motor0 = malloc(sizeof(motor_cfg_t));
@@ -44,7 +44,7 @@ void busca_parede(motor_cfg_t *motor0, motor_cfg_t *motor1, int *sonarDistances)
 		// Uoli deve seguir em frente ate encontrar um obstaculo
 	}
 
-	ajutar_posicao(motor0, motor1, sonarDistances);
+	ajustar_posicao(motor0, motor1, sonarDistances);
 
 }
 
@@ -79,7 +79,7 @@ void segue_parede(motor_cfg_t *motor0, motor_cfg_t *motor1, int *sonarDistances)
 			// afastar da parede
 			while(distanciaAtual > (distanciaIdeal - TOLERANCIA_DIST)){
 				motor1->speed = 0;
-				set_motor_speed(motor1);				
+				set_motor_speed(motor1);
 			}
 		}
 

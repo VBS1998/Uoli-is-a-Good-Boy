@@ -7,7 +7,7 @@
 #define DISTANCIA_PARA_VIRAR 20
 #define TEMPO_CURVA 100
 
-int main(){
+int _start(){
 
     motor_cfg_t *motor = malloc(sizeof(motor_cfg_t));
 

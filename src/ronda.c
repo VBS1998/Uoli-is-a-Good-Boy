@@ -1,4 +1,5 @@
-#include "api_robot.h"
+#include "api_robot2.h"
+#include <stdlib.h>
 
 #define VEL_RETO 30
 #define MOTOR_ESQ 1
@@ -6,7 +7,7 @@
 #define DISTANCIA_PARA_VIRAR 20
 #define TEMPO_CURVA 100
 
-int _start(){
+int main(){
 
     motor_cfg_t *motor = malloc(sizeof(motor_cfg_t));
 
@@ -20,6 +21,7 @@ int _start(){
             motor->id = MOTOR_ESQ;
             motor->speed = VEL_RETO;
             set_motor_speed(motor);
+            int reto = 1;
             //Vai indo checando paredes:
             while(get_time() < t*250){ //com t*250, usamos a unidade de tempo como 0,25 segundos
                 if(read_sonar(3) <= DISTANCIA_PARA_VIRAR || read_sonar(4) <= DISTANCIA_PARA_VIRAR){ //Se encontrar uma parede
@@ -49,5 +51,5 @@ int _start(){
         }
     }
     free(motor);
+    return 0;
 }
-return 0;

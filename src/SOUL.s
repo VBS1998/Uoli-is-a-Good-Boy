@@ -104,10 +104,10 @@ reset_handler:
 @   2) ----------- Inicialização das pilhas modos de operação  ---------------
     @ Você pode inicializar as pilhas aqui (ou, pelo menos, antes de executar o código do usuário)
 
-
-    msr  CPSR_c,  #0b11010010           @ IRQ mode, IRQ/FIQ disabled
-    ldr r13, =inicio_pilha
-    msr  CPSR_c,  #0b11010011           @ SUPERVISOR mode, IRQ/FIQ disabled
+    ldr sp, =STACK_POINTER_SUPERVISOR
+    msr CPSR_c,  #0b11010010           @ IRQ mode, IRQ/FIQ disabled
+    ldr sp, =STACK_POINTER_IRQ
+    msr CPSR_c,  #0b11010011           @ SUPERVISOR mode, IRQ/FIQ disabled
 
 
 @    3) ----------- Configuração dos periféricos (GPT/GPIO) -------------------
@@ -223,9 +223,17 @@ svc_handler:
 			bhi fim_setar_motor
 
 			mov r1, r1, lsl #19				@ escreve em r1 os bits correspondentes a velocidade
-			orr r1, r1, #(1<<25)			@ escreve 1 no bit motor1_write (pra nao modificar a velocidade dele)
 			ldr r0, =GPIO_DR
+            ldr r0, [r0]
+            ldr r2, =0xFE03FFFF
+            and r0, r0, r2
+            orr r1, r1, r0
+            ldr r0, =GPIO_DR
 			str r1, [r0]					@ GPIO_DR = r1
+
+            orr r1, r1, #(1<<18)
+            str r1, [r0]
+
 			mov r0, #0
 			b fim_setar_motor
 
@@ -235,9 +243,16 @@ svc_handler:
 			bhi fim_setar_motor
 
             mov r1, r1, lsl #26				@ escreve em r1 os bits correspondentes a velocidade
-			orr r1, r1, #(1<<18)         	@ escreve 1 no bit motor0_write (pra nao modificar a velocidade dele)
-			ldr r0, =GPIO_DR
+            ldr r0, =GPIO_DR
+            ldr r2, =0x1FFFFFF
+            and r0, r0, r2
+            orr r1, r1, r0
+            ldr r0, =GPIO_DR
 			str r1, [r0]					@ GPIO_DR = r1
+
+            orr r1, r1, #(1<<18)
+            str r1, [r0]
+
 			mov r0, #0
 			b fim_setar_motor
 
@@ -254,11 +269,11 @@ svc_handler:
         ble id_valido
         mov r0, #-1
         b fim_read_sonar
-        
+
         id_valido:
         @---Escrever o ID no MUX---
-            mov r0, r0, lsl #26 @ Deixa tudo 0, menos os bits que vao para sonar_mux
-            orr r0, r0, #0b10000001000000 @ Coloca 1 nos motor write para nao mudar a velocidade deles
+            mov r0, r0, lsl #2                           @ Deixa tudo 0, menos os bits que vao para sonar_mux
+            orr r0, r0, #0b10000001000000000000000000    @ Coloca 1 nos motor write para nao mudar a velocidade deles
             ldr r1, =GPIO_DR
             str r0, [r1]
 
@@ -270,7 +285,7 @@ svc_handler:
 
             ldr r0, =GPIO_DR
             ldr r1, [r0]
-            mov r1, r1, lsl #6
+            mov r1, r1, lsl #14
             mov r0, r1, lsr #20
 
         fim_read_sonar:
@@ -366,5 +381,3 @@ atualiza:
 @ Nesta seção ficam todas as váriaveis utilizadas para execução do código deste arquivo (.word / .skip)
 .data
 counter: .word 0x00000000
-pilha: .skip 64
-inicio_pilha: .skip 4

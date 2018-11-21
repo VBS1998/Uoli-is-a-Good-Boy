@@ -1,6 +1,6 @@
 #include "api_robot2.h"
 
-#define VEL_RETO 30
+#define VEL_RETO 47
 #define MOTOR_ESQ 1
 #define MOTOR_DIR 0
 #define DISTANCIA_PARA_VIRAR 20

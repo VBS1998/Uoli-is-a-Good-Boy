@@ -10,7 +10,7 @@
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 @ Constante para definição do tempo pra o incremento do contador
-    .set TIME_SZ,                    200000 @ Dessa forma a unidade de tempo vira 1ms.
+    .set TIME_SZ,                    100
 
 @ Constantes para os Modos de operação do Processador, utilizados para trocar entre modos de operação (5 bits menos significativos)
     @ Valores para usar com FIQ/IRQ ativos

@@ -185,15 +185,6 @@ reset_handler:
     ldr pc, =USER_ADDRESS
 
 
-    @ penis
-    @ penis
-    @ penis
-    @ penis
-    @ penis
-    @ penis
-    @ penis
-    @
-
 @   Rotina para o tratamento de chamadas de sistemas, feitas pelo usuário
 @   As funções na camada BiCo fazem syscalls que são tratadas por essa rotina
 @   Esta rotina deve, determinar qual syscall foi realizada e realizar alguma ação (escrever nos motores, ler counter de tempo, ....)
@@ -241,8 +232,8 @@ svc_handler:
             ldr r0, =GPIO_DR
 			str r1, [r0]					@ GPIO_DR = r1
 
-            @2orr r1, r1, #(1<<18)
-            @str r1, [r0]
+            orr r1, r1, #(1<<18)
+            str r1, [r0]
 
 			mov r0, #0
 			b fim_setar_motor
@@ -261,8 +252,8 @@ svc_handler:
             ldr r0, =GPIO_DR
 			str r1, [r0]					@ GPIO_DR = r1
 
-            @orr r1, r1, #(1<<25)
-            @str r1, [r0]
+            orr r1, r1, #(1<<25)
+            str r1, [r0]
 
 			mov r0, #0
 			b fim_setar_motor
@@ -284,22 +275,47 @@ svc_handler:
         id_valido:
         @---Escrever o ID no MUX---
             mov r0, r0, lsl #2                           @ Deixa tudo 0, menos os bits que vao para sonar_mux
-            orr r0, r0, #0b10000001000000000000000000    @ Coloca 1 nos motor write para nao mudar a velocidade deles
             ldr r1, =GPIO_DR
-            str r0, [r1]
-
-        @---Realiza a leitura------
+            mov r2, #0xFFFFFFC3
+            ldr r1, [r1]
+            and r1, r1, r2
+            orr r1, r0, r1
             ldr r0, =GPIO_DR
             str r1, [r0]
 
-            push {lr}
-            bl atualiza
-            pop {lr}
+        @------Atualiza----
+        ldr r0, =GPIO_DR
+        ldr r1, [r0]
+        @---Escrever 0 no trigger----
+            and r1, r1, #0xFFFFFFFD
+            str r1, [r0]
 
-            ldr r0, =GPIO_DR
-            ldr r1, [r0]
-            mov r1, r1, lsl #14
-            mov r0, r1, lsr #20
+        @---Escrever 1 no trigger
+            orr r1, r1, #0x2
+            str r1, [r0]
+
+        @---Escrever 0 no trigger----
+            and r1, r1, #0xFFFFFFFD
+            str r1, [r0]
+
+        @---Verificar Flag-----------
+            verifica_flag:
+                ldr r1, [r0]
+                and r1, r1, #0x1
+                cmp r1, #1
+                beq fim_atualiza
+                b verifica_flag
+
+        fim_atualiza:
+            ldr r2, [r0]
+            mov r2, r2, lsr #1  @zera a flag
+            mov r2, r2, lsl #1
+            str r2, [r0]
+
+        ldr r0, =GPIO_DR
+        ldr r1, [r0]
+        mov r1, r1, lsr #14
+        mov r0, r1, lsl #20
 
         fim_read_sonar:
 
@@ -325,70 +341,6 @@ irq_handler:
 
     pop {r0, r1}
     movs pc, lr
-
-atualiza:
-    ldr r0, =GPIO_DR
-    ldr r1, [r0]
-    @---Escrever 0 no trigger----
-        and r1, r1, #0xFFFFFFFD
-        str r1, [r0]
-
-    @---Delay 15ms---------------
-        ldr r2, =counter
-        ldr r2, [r2]
-        ldr r3, =15
-        add r2, r2, r3
-        primeiro_delay:
-        ldr r3, =counter
-        ldr r3, [r3]
-        cmp r2, r3
-        bgt primeiro_delay
-
-    @---Escrever 1 no trigger
-        orr r1, r1, #0x2
-        str r1, [r0]
-
-    @---Delay 15ms---------------
-        ldr r2, =counter
-        ldr r2, [r2]
-        ldr r3, =15
-        add r2, r2, r3
-        segundo_delay:
-        ldr r3, =counter
-        ldr r3, [r3]
-        cmp r2, r3
-        bgt segundo_delay
-
-    @---Escrever 0 no trigger----
-        and r1, r1, #0xFFFFFFFD
-        str r1, [r0]
-
-    @---Verificar Flag-----------
-        verifica_flag:
-            ldr r2, [r0]
-            mov r2, r2, lsr #1
-            and r2, r2, #1
-            cmp r2, #1
-            beq fim_atualiza
-    @---Delay 10ms---------------
-        ldr r2, =counter
-        ldr r2, [r2]
-        ldr r3, =10
-        add r2, r2, r3
-        terceiro_delay:
-        ldr r3, =counter
-        ldr r3, [r3]
-        cmp r2, r3
-        bgt terceiro_delay
-        b verifica_flag
-
-    fim_atualiza:
-        ldr r2, [r0]
-        mov r2, r2, lsr #1
-        mov r2, r2, lsl #1
-        str r2, [r0]
-    mov pc, lr
-
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @@      Seção de Dados                        @@
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

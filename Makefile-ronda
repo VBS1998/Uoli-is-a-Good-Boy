@@ -1,7 +1,7 @@
 compile:
 	arm-eabi-as src/SOUL.s -o bin/SOUL.o
 	arm-eabi-as src/api_robot2.s -o bin/api_robot2.o
-	gcc src/ronda.c -S -o src/ronda.s
+	arm-none-eabi-gcc src/ronda.c -S -o src/ronda.s
 	arm-eabi-as src/ronda.s -o bin/ronda.o
 	arm-eabi-ld bin/SOUL.o -o bin/SOUL --section-start=.iv=0x778005e0 -Ttext=0x77800700 -Tdata=0x77801800 -e 0x778005e0
 	arm-eabi-ld bin/api_robot2.o bin/ronda.o -o bin/ronda -Tdata=0x77803000

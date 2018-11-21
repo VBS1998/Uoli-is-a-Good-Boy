@@ -11,7 +11,7 @@ set_motor_speed:
 	push {r7, lr}
 	ldrb r2, [r0]		@ id do motor em r2
 	ldrb r1, [r0, #1]	@ speed em r1
-	mov r1, r2			@ id do motor em r0
+	mov r0, r2			@ id do motor em r0
 	mov r7, #20			@ codigo da syscall set_motor_speed
 	svc 0x0				@ chamada da syscall (ja poe o retorno em r0)
 	pop {r7, pc}

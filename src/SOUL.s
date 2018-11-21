@@ -9,7 +9,7 @@
 @@      Seção de Constantes/Defines           @@
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-@ Constante para definição do tempo pra o incremento do contador
+@ Constante para definição do tempo pra o incremento do counter
     .set TIME_SZ,                    100
 
 @ Constantes para os Modos de operação do Processador, utilizados para trocar entre modos de operação (5 bits menos significativos)
@@ -69,7 +69,7 @@ interrupt_vector:
 @ Uma vez que o código de usuário é executado, syscalls são utilizadas para voltar aos modo de operação de sistema.
 @
 @ Essa rotina deve configurar:
-@   1)  Inicializar o contador de tempo (variável conta
+@   1)  Inicializar o counter de tempo (variável conta
     @Faz o registrador que aponta para a tabela de interrupções apontar para a tabela interrupt_vector
     ldr r0, =interrupt_vector @ carrega vetor de interrupcoedor) e o endereço base do vetor de interrupções no coprocessador p15    -- (OK)
 @
@@ -78,7 +78,7 @@ interrupt_vector:
 @          * Lembre-se que, o registrador CPRS (que pode ser acessado por instruções mrs/msr) contém o modo de operação atual do processador. Para trocar de modo, basta escrever os bits referentes ao novo modo, no CPRS. Apenas o modo de operação USER possui restrições quanto a escrever no CPRS. Para retornar a um modo de operação de sistema, o usuário deve realizar uma syscall (que é tratada pelo svc_handler)
 @
 @   3)  Configurar os dispositivos:
-@          * Configurar o GPT para gerar uma interrupção do tipo IRQ (que será tratada por irq_handler) assim que o contador atingir um valor definido. O GPT é um contador de propósito geral e deve-se configurar a frequencia e o valor que será contado. Cada interrupção gerada deste contador representa uma unidade de tempo do seu sistema (quanto mais alto ou baixo o valor de contagem, seu tempo passará mais rapído ou devagar)
+@          * Configurar o GPT para gerar uma interrupção do tipo IRQ (que será tratada por irq_handler) assim que o counter atingir um valor definido. O GPT é um counter de propósito geral e deve-se configurar a frequencia e o valor que será contado. Cada interrupção gerada deste counter representa uma unidade de tempo do seu sistema (quanto mais alto ou baixo o valor de contagem, seu tempo passará mais rapído ou devagar)
 @          * Configurar GPIO: Definir em GDIR quais portas do GPIO são de entrada e saída.
 @
 @   4)  Configurar o TZIC (Controlador de Interrupções)         -- (OK)
@@ -91,8 +91,8 @@ interrupt_vector:
 @           * Uma vez que o código de usuário é executado, a rotina reset_handler não é mais usada (até reinicar). Apenas as rotinas irq_handler (para interrupções do GPT) e svc_handler (para syscalls feitas pelo usuário) são utilizadas.
 
 reset_handler:
-@   1) ----------- Inicialização do contador e do IV -------------------------
-    @ zera contador de tempo
+@   1) ----------- Inicialização do counter e do IV -------------------------
+    @ zera counter de tempo
     mov r0, #0
     ldr r1, =counter
     str r0, [r1]
@@ -134,7 +134,7 @@ reset_handler:
 
     @ Configuracao de entradas e saidas
     ldr r0, =GPIO_GDIR
-    ldr r1, =0b01111100000000000011111111111111
+    ldr r1, =0b11111111111111000000000000111110
     str r1, [r0]
 
     @ Inicializando o GPIO_DR
@@ -186,13 +186,13 @@ reset_handler:
 
 @   Rotina para o tratamento de chamadas de sistemas, feitas pelo usuário
 @   As funções na camada BiCo fazem syscalls que são tratadas por essa rotina
-@   Esta rotina deve, determinar qual syscall foi realizada e realizar alguma ação (escrever nos motores, ler contador de tempo, ....)
+@   Esta rotina deve, determinar qual syscall foi realizada e realizar alguma ação (escrever nos motores, ler counter de tempo, ....)
 svc_handler:
 
     cmp r7, #17
     bne set_t
     @-----Get time------
-        ldr r0, =contador
+        ldr r0, =counter
         ldr r0, [r0]
         movs pc, lr
     @-------------------
@@ -201,7 +201,7 @@ svc_handler:
     cmp r7, #18
     bne set_m
     @-----Set time------
-        ldr r1, =contador
+        ldr r1, =counter
         str r0, [r1]
         movs pc, lr
     @-------------------
@@ -219,11 +219,11 @@ svc_handler:
 
 		motor0:
 			cmp r1, #63						@ if (r1 > 63)
-			movgt r0, #-2					@ velocidade invalida
-			bgt fim_setar_motor
+			movhi r0, #-2					@ velocidade invalida
+			bhi fim_setar_motor
 
-			mov r1, r1, lsl #7				@ escreve em r1 os bits correspondentes a velocidade
-			orr r1, r1, #0b1000000			@ escreve 1 no bit motor1_write (pra nao modificar a velocidade dele)
+			mov r1, r1, lsl #19				@ escreve em r1 os bits correspondentes a velocidade
+			orr r1, r1, #(1<<25)			@ escreve 1 no bit motor1_write (pra nao modificar a velocidade dele)
 			ldr r0, =GPIO_DR
 			str r1, [r0]					@ GPIO_DR = r1
 			mov r0, #0
@@ -231,10 +231,11 @@ svc_handler:
 
 		motor1:
 			cmp r1, #63						@ if (r1 > 63)
-			movgt r0, #-2					@ velocidade invalida
-			bgt fim_setar_motor
+			movhi r0, #-2					@ velocidade invalida
+			bhi fim_setar_motor
 
-			orr r1, r1, #0b10000000000000	@ escreve 1 no bit motor0_write (pra nao modificar a velocidade dele)
+            mov r1, r1, lsl #26				@ escreve em r1 os bits correspondentes a velocidade
+			orr r1, r1, #(1<<18)         	@ escreve 1 no bit motor0_write (pra nao modificar a velocidade dele)
 			ldr r0, =GPIO_DR
 			str r1, [r0]					@ GPIO_DR = r1
 			mov r0, #0
@@ -253,7 +254,7 @@ svc_handler:
         ble id_valido
         mov r0, #-1
         b fim_read_sonar
-
+        
         id_valido:
         @---Escrever o ID no MUX---
             mov r0, r0, lsl #26 @ Deixa tudo 0, menos os bits que vao para sonar_mux
@@ -281,7 +282,7 @@ svc_handler:
         movs pc, lr
 
 @   Rotina para o tratamento de interrupções IRQ
-@   Sempre que uma interrupção do tipo IRQ acontece, esta rotina é executada. O GPT, quando configurado, gera uma interrupção do tipo IRQ. Neste caso, o contador de tempo pode ser incrementado (este incremento corresponde a 1 unidade de tempo do seu sistema)
+@   Sempre que uma interrupção do tipo IRQ acontece, esta rotina é executada. O GPT, quando configurado, gera uma interrupção do tipo IRQ. Neste caso, o counter de tempo pode ser incrementado (este incremento corresponde a 1 unidade de tempo do seu sistema)
 irq_handler:
     push {r0, r1}
 
@@ -305,12 +306,12 @@ atualiza:
         str r1, [r0]
 
     @---Delay 15ms---------------
-        ldr r2, =contador
+        ldr r2, =counter
         ldr r2, [r2]
         ldr r3, =15
         add r2, r2, r3
         primeiro_delay:
-        ldr r3, =contador
+        ldr r3, =counter
         ldr r3, [r3]
         cmp r2, r3
         bgt primeiro_delay
@@ -320,12 +321,12 @@ atualiza:
         str r1, [r0]
 
     @---Delay 15ms---------------
-        ldr r2, =contador
+        ldr r2, =counter
         ldr r2, [r2]
         ldr r3, =15
         add r2, r2, r3
         segundo_delay:
-        ldr r3, =contador
+        ldr r3, =counter
         ldr r3, [r3]
         cmp r2, r3
         bgt segundo_delay
@@ -341,12 +342,12 @@ atualiza:
             cmp r2, #1
             beq fim_atualiza
     @---Delay 10ms---------------
-        ldr r2, =contador
+        ldr r2, =counter
         ldr r2, [r2]
         ldr r3, =10
         add r2, r2, r3
         terceiro_delay:
-        ldr r3, =contador
+        ldr r3, =counter
         ldr r3, [r3]
         cmp r2, r3
         bgt terceiro_delay

@@ -244,13 +244,14 @@ svc_handler:
 
             mov r1, r1, lsl #26				@ escreve em r1 os bits correspondentes a velocidade
             ldr r0, =GPIO_DR
+            ldr r0, [r0]
             ldr r2, =0x1FFFFFF
             and r0, r0, r2
             orr r1, r1, r0
             ldr r0, =GPIO_DR
 			str r1, [r0]					@ GPIO_DR = r1
 
-            orr r1, r1, #(1<<18)
+            orr r1, r1, #(1<<25)
             str r1, [r0]
 
 			mov r0, #0

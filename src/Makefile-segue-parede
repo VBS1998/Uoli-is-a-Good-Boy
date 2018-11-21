@@ -15,7 +15,7 @@ AS=arm-eabi-as
 AS_FLAGS=-g
 
 CC=arm-none-eabi-gcc
-CC_FLAGS=
+CC_FLAGS=-g
 
 LD=arm-eabi-ld
 LD_FLAGS=-g

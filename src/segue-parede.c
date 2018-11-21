@@ -139,7 +139,7 @@
 
 #include "api_robot2.h"
 
-#define VEL_RETO 46
+#define VEL_RETO 30
 
 int _start() {
 
@@ -154,4 +154,5 @@ int _start() {
     set_motor_speed(&motor1);
 
     while(1){}
+	return 0;
 }

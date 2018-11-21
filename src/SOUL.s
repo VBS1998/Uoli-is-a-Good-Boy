@@ -184,6 +184,16 @@ reset_handler:
     mov sp, #STACK_POINTER_USER
     ldr pc, =USER_ADDRESS
 
+
+    @ penis
+    @ penis
+    @ penis
+    @ penis
+    @ penis
+    @ penis
+    @ penis
+    @
+
 @   Rotina para o tratamento de chamadas de sistemas, feitas pelo usuário
 @   As funções na camada BiCo fazem syscalls que são tratadas por essa rotina
 @   Esta rotina deve, determinar qual syscall foi realizada e realizar alguma ação (escrever nos motores, ler counter de tempo, ....)
@@ -231,8 +241,8 @@ svc_handler:
             ldr r0, =GPIO_DR
 			str r1, [r0]					@ GPIO_DR = r1
 
-            orr r1, r1, #(1<<18)
-            str r1, [r0]
+            @2orr r1, r1, #(1<<18)
+            @str r1, [r0]
 
 			mov r0, #0
 			b fim_setar_motor
@@ -251,8 +261,8 @@ svc_handler:
             ldr r0, =GPIO_DR
 			str r1, [r0]					@ GPIO_DR = r1
 
-            orr r1, r1, #(1<<25)
-            str r1, [r0]
+            @orr r1, r1, #(1<<25)
+            @str r1, [r0]
 
 			mov r0, #0
 			b fim_setar_motor
@@ -282,7 +292,9 @@ svc_handler:
             ldr r0, =GPIO_DR
             str r1, [r0]
 
+            push {lr}
             bl atualiza
+            pop {lr}
 
             ldr r0, =GPIO_DR
             ldr r1, [r0]
@@ -318,7 +330,7 @@ atualiza:
     ldr r0, =GPIO_DR
     ldr r1, [r0]
     @---Escrever 0 no trigger----
-        and r1, r1, #0xBFFFFFFF
+        and r1, r1, #0xFFFFFFFD
         str r1, [r0]
 
     @---Delay 15ms---------------
@@ -333,7 +345,7 @@ atualiza:
         bgt primeiro_delay
 
     @---Escrever 1 no trigger
-        orr r1, r1, #0x40000000
+        orr r1, r1, #0x2
         str r1, [r0]
 
     @---Delay 15ms---------------
@@ -348,13 +360,14 @@ atualiza:
         bgt segundo_delay
 
     @---Escrever 0 no trigger----
-        and r1, r1, #0xBFFFFFFF
+        and r1, r1, #0xFFFFFFFD
         str r1, [r0]
 
     @---Verificar Flag-----------
         verifica_flag:
             ldr r2, [r0]
-            mov r2, r2, lsr #31
+            mov r2, r2, lsr #1
+            and r2, r2, #1
             cmp r2, #1
             beq fim_atualiza
     @---Delay 10ms---------------
@@ -371,8 +384,8 @@ atualiza:
 
     fim_atualiza:
         ldr r2, [r0]
-        mov r2, r2, lsl #1
         mov r2, r2, lsr #1
+        mov r2, r2, lsl #1
         str r2, [r0]
     mov pc, lr
 

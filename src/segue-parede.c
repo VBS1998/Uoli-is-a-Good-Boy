@@ -40,7 +40,7 @@ void busca_parede(motor_cfg_t *motor0, motor_cfg_t *motor1, int *sonarDistances)
 	set_motor_speed(motor0);	// setando a velocidade inicial
 	set_motor_speed(motor1);	// dos dois motores em 30
 
-	while (read_sonar(3) > LIMIAR) {
+	while (read_sonar(3) > LIMIAR && read_sonar(4) > LIMIAR) {
 		// Uoli deve seguir em frente ate encontrar um obstaculo
 	}
 
@@ -57,7 +57,7 @@ void segue_parede(motor_cfg_t *motor0, motor_cfg_t *motor1, int *sonarDistances)
 
 
 	while (1) {
-		if (read_sonar(3) < LIMIAR) {				// evitar colisao frontal
+		if (read_sonar(3) < LIMIAR || read_sonar(4) < LIMIAR) {				// evitar colisao frontal
 			set_time(0);							// nao sei se isso funciona hahaha
 			motor1->speed = 0;						// pode mudar se ce achar que ta mto porco
 			set_motor_speed(motor1);

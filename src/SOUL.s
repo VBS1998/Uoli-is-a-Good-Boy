@@ -189,12 +189,13 @@ reset_handler:
 @   As funções na camada BiCo fazem syscalls que são tratadas por essa rotina
 @   Esta rotina deve, determinar qual syscall foi realizada e realizar alguma ação (escrever nos motores, ler counter de tempo, ....)
 svc_handler:
-
+    push {lr}
     cmp r7, #17
     bne set_t
     @-----Get time------
         ldr r0, =counter
         ldr r0, [r0]
+        pop {lr}
         movs pc, lr
     @-------------------
 
@@ -204,6 +205,7 @@ svc_handler:
     @-----Set time------
         ldr r1, =counter
         str r0, [r1]
+        pop {lr}
         movs pc, lr
     @-------------------
 
@@ -259,7 +261,7 @@ svc_handler:
 			b fim_setar_motor
 
 		fim_setar_motor:
-
+        pop {lr}
         movs pc, lr
     @-------------------
 
@@ -319,10 +321,14 @@ svc_handler:
 
         fim_read_sonar:
 
+        pop {lr}
+
         movs pc, lr
     @-------------------
 
     invalid_syscall_code:
+        pop {lr}
+
         movs pc, lr
 
 @   Rotina para o tratamento de interrupções IRQ
@@ -340,6 +346,7 @@ irq_handler:
         str r1, [r0]
 
     pop {r0, r1}
+    sub lr, lr, #4
     movs pc, lr
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @@      Seção de Dados                        @@

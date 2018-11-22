@@ -1,0 +1,65 @@
+player /home/specg12-1/mc404/simulador/simulador_player/worlds_mc404/simple.cfg
+source /home/specg12-2/mc404/simulador/set_path_player.sh
+armsim_player --rom=/home/specg12-1/mc404/simulador/simulador_player/bin/dumboot.bin --sd=disk.img
+
+
+ldr r0, =GPIO_DR
+ldr r1, [r0]
+@---Escrever 0 no trigger----
+    and r1, r1, #0xFFFFFFFD
+    str r1, [r0]
+
+@---Delay 15ms---------------
+    ldr r2, =counter
+    ldr r2, [r2]
+    ldr r3, =15
+    add r2, r2, r3
+    primeiro_delay:
+    ldr r3, =counter
+    ldr r3, [r3]
+    cmp r2, r3
+    bgt primeiro_delay
+
+@---Escrever 1 no trigger
+    orr r1, r1, #0x2
+    str r1, [r0]
+
+@---Delay 15ms---------------
+    ldr r2, =counter
+    ldr r2, [r2]
+    ldr r3, =15
+    add r2, r2, r3
+    segundo_delay:
+    ldr r3, =counter
+    ldr r3, [r3]
+    cmp r2, r3
+    bgt segundo_delay
+
+@---Escrever 0 no trigger----
+    and r1, r1, #0xFFFFFFFD
+    str r1, [r0]
+
+@---Verificar Flag-----------
+    verifica_flag:
+        ldr r2, [r0]
+        mov r2, r2, lsr #1
+        and r2, r2, #1
+        cmp r2, #1
+        beq fim_atualiza
+@---Delay 10ms---------------
+    ldr r2, =counter
+    ldr r2, [r2]
+    ldr r3, =10
+    add r2, r2, r3
+    terceiro_delay:
+    ldr r3, =counter
+    ldr r3, [r3]
+    cmp r2, r3
+    bgt terceiro_delay
+    b verifica_flag
+
+fim_atualiza:
+    ldr r2, [r0]
+    mov r2, r2, lsr #1
+    mov r2, r2, lsl #1
+    str r2, [r0]

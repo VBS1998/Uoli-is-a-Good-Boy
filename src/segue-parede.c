@@ -108,36 +108,34 @@
 // 	return min;
 //
 // }
-// #include "api_robot.h"
-//
-// #define VEL_RETO 30
-//
-// void segue_parede() {
-//     motor_cfg_t motor0, motor1;
-//     motor0.id = 0;
-//     motor1.id = 1;
-//
-//     motor0.speed = VEL_RETO;
-//     motor1.speed = VEL_RETO;
-//
-//     set_motor_speed(&motor0);
-//     set_motor_speed(&motor1);
-//
-// 	int aux;
-//     while(1){
-// 		aux++;
-// 	}
-//
-// }
-
 #include "api_robot.h"
 
-void _start(){
+#define VEL_RETO 30
 
-	int volatile * const p_reg = (int *) 0x8000000;
-	*p_reg = 0x7;
+void main() {
+    motor_cfg_t motor0, motor1;
+    motor0.id = 0;
+    motor1.id = 1;
 
-	while(1){
-		*p_reg = read_sonar(3);
+    motor0.speed = VEL_RETO;
+    motor1.speed = VEL_RETO;
+
+    set_motor_speed(&motor0);
+    set_motor_speed(&motor1);
+
+    while(1){
 	}
+
 }
+
+// #include "api_robot.h"
+//
+// void _start(){
+//
+// 	int volatile * const p_reg = (int *) 0x8000000;
+// 	*p_reg = 0x7;
+//
+// 	while(1){
+// 		*p_reg = read_sonar(3);
+// 	}
+// }

@@ -10,7 +10,7 @@
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 @ Constante para definição do tempo pra o incremento do counter
-    .set TIME_SZ,                    100
+    .set TIME_SZ,                    5
 
 @ Constantes para os Modos de operação do Processador, utilizados para trocar entre modos de operação (5 bits menos significativos)
     @ Valores para usar com FIQ/IRQ ativos
@@ -190,6 +190,9 @@ reset_handler:
 @   Esta rotina deve, determinar qual syscall foi realizada e realizar alguma ação (escrever nos motores, ler counter de tempo, ....)
 svc_handler:
     push {lr}
+
+	msr CPSR_c, #0x13	@ habilita interrupcoes do tipo IRQ, para o sistema continuar contando o tempo
+
     cmp r7, #17
     bne set_t
     @-----Get time------

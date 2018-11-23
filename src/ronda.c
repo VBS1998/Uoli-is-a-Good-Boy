@@ -1,10 +1,10 @@
-#include "api_robot2.h"
+#include "api_robot.h"
 
-#define VEL_RETO 46
+#define VEL_RETO 30
 #define MOTOR_ESQ 1
 #define MOTOR_DIR 0
 #define DISTANCIA_PARA_VIRAR 20
-#define TEMPO_CURVA 100
+#define TEMPO_CURVA 540
 
 int _start(){
 
@@ -22,23 +22,23 @@ int _start(){
             set_motor_speed(&motor);
             int reto = 1;
             //Vai indo checando paredes:
-            while(get_time() < t*250){ //com t*250, usamos a unidade de tempo como 0,25 segundos
-                if(read_sonar(3) <= DISTANCIA_PARA_VIRAR || read_sonar(4) <= DISTANCIA_PARA_VIRAR){ //Se encontrar uma parede
-                    if(reto){ //so seta a speed pra girar se estiver indo reto
-                        motor.id = MOTOR_DIR;
-                        motor.speed = 0;
-                        set_motor_speed(&motor);
-                    }
-                    reto = 0;
-                }
-                else{
-                    if(!reto){
-                        motor.id = MOTOR_DIR;
-                        motor.speed = VEL_RETO;
-                        set_motor_speed(&motor);
-                    }
-                    reto = 1;
-                }
+            while(get_time() < t*500){ //com t*250, usamos a unidade de tempo como 0,25 segundos
+                // if(read_sonar(3) <= DISTANCIA_PARA_VIRAR || read_sonar(4) <= DISTANCIA_PARA_VIRAR){ //Se encontrar uma parede
+                //     if(reto){ //so seta a speed pra girar se estiver indo reto
+                //         motor.id = MOTOR_DIR;
+                //         motor.speed = 0;
+                //         set_motor_speed(&motor);
+                //     }
+                //     reto = 0;
+                // }
+                // else{
+                //     if(!reto){
+                //         motor.id = MOTOR_DIR;
+                //         motor.speed = VEL_RETO;
+                //         set_motor_speed(&motor);
+                //     }
+                //     reto = 1;
+                // }
             }
 
             //Vira 90 graus para a direita:
@@ -48,6 +48,7 @@ int _start(){
             set_motor_speed(&motor);
             while(get_time() < TEMPO_CURVA){}
         }
+        break;
     }
     return 0;
 }

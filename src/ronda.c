@@ -22,7 +22,7 @@ int _start(){
             set_motor_speed(&motor);
             int reto = 1;
             //Vai indo checando paredes:
-            while(get_time() < t*500){ //com t*250, usamos a unidade de tempo como 0,25 segundos
+            while(get_time() < t*500){
                 // if(read_sonar(3) <= DISTANCIA_PARA_VIRAR || read_sonar(4) <= DISTANCIA_PARA_VIRAR){ //Se encontrar uma parede
                 //     if(reto){ //so seta a speed pra girar se estiver indo reto
                 //         motor.id = MOTOR_DIR;
@@ -48,7 +48,6 @@ int _start(){
             set_motor_speed(&motor);
             while(get_time() < TEMPO_CURVA){}
         }
-        break;
     }
     return 0;
 }

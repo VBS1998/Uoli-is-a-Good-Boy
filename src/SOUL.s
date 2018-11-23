@@ -28,7 +28,7 @@
 @ Constantes referentes aos endereços dos registradores do GPIO
     .set GPIO_DR,                    0x53F84000      @ Endereço do registrador DR do GPIO
     .set GPIO_GDIR,                  0x53F84004      @ Endereço do registrador GDIR do GPIO
-    .set GPIO_PSR,                  0x53F84008      @ Endereço do registrador PSR do GPIO
+    .set GPIO_PSR,                   0x53F84008      @ Endereço do registrador PSR do GPIO
 
 @ Constantes Referentes ao TZIC
     .set TZIC_BASE,                 0x0FFFC000
@@ -193,8 +193,8 @@ svc_handler:
     cmp r7, #17
     bne set_t
     @-----Get time------
-        ldr r0, =counter
-        ldr r0, [r0]
+        ldr r1, =counter
+        ldr r0, [r1]
         pop {lr}
         movs pc, lr
     @-------------------
@@ -323,7 +323,7 @@ svc_handler:
                 beq fim_atualiza
                 b verifica_flag
 
-        fim_atualiza:		@ pra que serve esse trecho ????
+        fim_atualiza:
 
 		ldr r0, =GPIO_DR
 		ldr r1, [r0]

@@ -227,15 +227,12 @@ svc_handler:
 
 			mov r1, r1, lsl #19				@ escreve em r1 os bits correspondentes a velocidade
 			ldr r0, =GPIO_DR
-            ldr r0, [r0]
-            ldr r2, =0xFE03FFFF
-            and r0, r0, r2
-            orr r1, r1, r0
-            ldr r0, =GPIO_DR
+			ldr r0, [r0]
+			ldr r2, =0xFE03FFFF
+			and r0, r0, r2
+			orr r1, r1, r0
+			ldr r0, =GPIO_DR
 			str r1, [r0]					@ GPIO_DR = r1
-
-            orr r1, r1, #(1<<18)
-            str r1, [r0]
 
 			mov r0, #0
 			b fim_setar_motor
@@ -245,24 +242,21 @@ svc_handler:
 			movhi r0, #-2					@ velocidade invalida
 			bhi fim_setar_motor
 
-            mov r1, r1, lsl #26				@ escreve em r1 os bits correspondentes a velocidade
-            ldr r0, =GPIO_DR
-            ldr r0, [r0]
-            ldr r2, =0x1FFFFFF
-            and r0, r0, r2
-            orr r1, r1, r0
-            ldr r0, =GPIO_DR
+			mov r1, r1, lsl #26				@ escreve em r1 os bits correspondentes a velocidade
+			ldr r0, =GPIO_DR
+			ldr r0, [r0]
+			ldr r2, =0x1FFFFFF
+			and r0, r0, r2
+			orr r1, r1, r0
+			ldr r0, =GPIO_DR
 			str r1, [r0]					@ GPIO_DR = r1
-
-            orr r1, r1, #(1<<25)
-            str r1, [r0]
-
+											@ botar 1 no motor_write
 			mov r0, #0
 			b fim_setar_motor
 
 		fim_setar_motor:
-        pop {lr}
-        movs pc, lr
+			pop {lr}
+			movs pc, lr
     @-------------------
 
     read_s:
@@ -285,18 +279,39 @@ svc_handler:
             ldr r0, =GPIO_DR
             str r1, [r0]
 
-        @------Atualiza----
-        ldr r0, =GPIO_DR
-        ldr r1, [r0]
-        @---Escrever 0 no trigger----
+		@------Atualiza----
+		ldr r0, =GPIO_DR
+		ldr r1, [r0]
+		@---Escrever 0 no trigger----
             and r1, r1, #0xFFFFFFFD
             str r1, [r0]
 
+		@---Primeiro Delay----
+		mov r2, #0
+		primeiro_delay:
+			cmp r2, #100
+			bgt fim_primeiro_delay
+			add r2, r2, #1
+			b primeiro_delay
+		fim_primeiro_delay:
+
+
         @---Escrever 1 no trigger
+			ldr r1, [r0]
             orr r1, r1, #0x2
             str r1, [r0]
 
+		@---Segundo Delay----
+		mov r2, #0
+		segundo_delay:
+			cmp r2, #100
+			bgt fim_segundo_delay
+			add r2, r2, #1
+			b segundo_delay
+		fim_segundo_delay:
+
         @---Escrever 0 no trigger----
+			ldr r1, [r0]
             and r1, r1, #0xFFFFFFFD
             str r1, [r0]
 
@@ -308,22 +323,19 @@ svc_handler:
                 beq fim_atualiza
                 b verifica_flag
 
-        fim_atualiza:
-            ldr r2, [r0]
-            mov r2, r2, lsr #1  @zera a flag
-            mov r2, r2, lsl #1
-            str r2, [r0]
+        fim_atualiza:		@ pra que serve esse trecho ????
 
-        ldr r0, =GPIO_DR
-        ldr r1, [r0]
-        mov r1, r1, lsr #14
-        mov r0, r1, lsl #20
+		ldr r0, =GPIO_DR
+		ldr r1, [r0]
+		ldr r3, =0x3FFC0
+		and r1, r1, r3
+		mov r0, r1, lsr #6
 
-        fim_read_sonar:
+		fim_read_sonar:
 
-        pop {lr}
+		pop {lr}
 
-        movs pc, lr
+		movs pc, lr
     @-------------------
 
     invalid_syscall_code:

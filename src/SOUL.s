@@ -286,16 +286,6 @@ svc_handler:
             and r1, r1, #0xFFFFFFFD
             str r1, [r0]
 
-		@---Primeiro Delay----
-		mov r2, #0
-		primeiro_delay:
-			cmp r2, #100
-			bgt fim_primeiro_delay
-			add r2, r2, #1
-			b primeiro_delay
-		fim_primeiro_delay:
-
-
         @---Escrever 1 no trigger
 			ldr r1, [r0]
             orr r1, r1, #0x2
@@ -303,12 +293,11 @@ svc_handler:
 
 		@---Segundo Delay----
 		mov r2, #0
-		segundo_delay:
-			cmp r2, #100
-			bgt fim_segundo_delay
+		primeiro_delay:
+			cmp r2, #5
+			bgt fim_primeiro_delay
 			add r2, r2, #1
-			b segundo_delay
-		fim_segundo_delay:
+		fim_primeiro_delay:
 
         @---Escrever 0 no trigger----
 			ldr r1, [r0]

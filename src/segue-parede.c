@@ -1,15 +1,17 @@
 
 #include "api_robot.h"
 
-#define LIMIAR 800				// decidir bons valores para o
+#define LIMIAR 1000				// decidir bons valores para o
 #define NORMALSPEED 30			// limiar, velocidade padrao,
-#define TOLERANCIA_DIST 10		// tolerancia da distancia a parede,
-#define VELOC_PAREDE 10			// e velocidade de seguir parede
+#define TOLERANCIA_DIST 20		// tolerancia da distancia a parede,
+#define VELOC_PAREDE 7			// e velocidade de seguir parede
 
 
 int acharSonarMaisProximo (int *array, int size);
 void ajustar_posicao(motor_cfg_t *motor0, motor_cfg_t *motor1, int *sonarDistances);
 void seguir_parede(motor_cfg_t *motor0, motor_cfg_t *motor1, int *sonarDistances);
+void ajustar_posicao_parede (motor_cfg_t *motor0, motor_cfg_t *motor1, int distanciaIdeal);
+void virar (motor_cfg_t *motor);
 
 void _start() {
 
@@ -41,10 +43,14 @@ void ajustar_posicao(motor_cfg_t *motor0, motor_cfg_t *motor1, int *sonarDistanc
 
 	motor0->speed = 5;
 	motor1->speed = 0;
-	set_motor_speed(motor0);			// velocidade ajustada para
-	set_motor_speed(motor1);			// curva a esquerda
+	set_motor_speed(motor1);			// velocidade ajustada para
+	set_motor_speed(motor0);			// curva a esquerda
 
 	do {
+		motor0->speed = 20;
+		set_motor_speed(motor0);
+		motor0->speed = 0;
+		set_motor_speed(motor0);
 		closestSonar = acharSonarMaisProximo(sonarDistances, 16);
 	} while (closestSonar != 7);	// sonares referentes ao lado direito do Uoli
 
@@ -70,10 +76,13 @@ void seguir_parede(motor_cfg_t *motor0, motor_cfg_t *motor1, int *sonarDistances
 			continue;
 		}
 		distanciaAtual = read_sonar(7);
-		if (distanciaAtual > (distanciaIdeal + TOLERANCIA_DIST)) {
-			ajustar_posicao(motor1, motor0, sonarDistances);	// aproximar da parede
-		} else if (distanciaAtual < (distanciaIdeal - TOLERANCIA_DIST)) {
-			ajustar_posicao(motor0, motor1, sonarDistances);	// afastar da parede
+		if (distanciaAtual > distanciaIdeal + TOLERANCIA_DIST) {
+			ajustar_posicao_parede(motor1, motor0, distanciaIdeal);	// aproximar da parede
+			distanciaIdeal = read_sonar(7);
+		} else if (distanciaAtual < distanciaIdeal - TOLERANCIA_DIST) {
+			//ajustar_posicao_parede(motor0, motor1, distanciaIdeal);	// afastar da parede
+			//distanciaIdeal = read_sonar(7);
+			virar(motor0);
 		}
 
 	}
@@ -85,9 +94,9 @@ void seguir_parede(motor_cfg_t *motor0, motor_cfg_t *motor1, int *sonarDistances
  */
 int acharSonarMaisProximo (int *array, int size) {
 
-	int min = 6;
-	array[6] = read_sonar(6);
-	for (int i = 4; i < 12; i++) {
+	int min = 5;
+	array[5] = read_sonar(5);
+	for (int i = 6; i < 8; i++) {
 		array[i] = read_sonar(i);
 		if (array[i] < array[min]) {
 			min = i;
@@ -95,6 +104,37 @@ int acharSonarMaisProximo (int *array, int size) {
 	}
 
 	return min;
+
+}
+
+void virar (motor_cfg_t *motor) {
+	motor->speed = 35;
+	set_motor_speed(motor);
+	motor->speed = VELOC_PAREDE;
+	set_motor_speed(motor);
+}
+
+
+void ajustar_posicao_parede (motor_cfg_t *motor0, motor_cfg_t *motor1, int distanciaIdeal) {
+
+	motor0->speed = 5;
+	motor1->speed = 0;
+	set_motor_speed(motor1);			// velocidade ajustada para
+	set_motor_speed(motor0);			// curva a esquerda
+
+	do {
+		motor0->speed = 20;
+		set_motor_speed(motor0);
+		motor0->speed = 0;
+		set_motor_speed(motor0);
+	} while ((read_sonar(7) < distanciaIdeal - TOLERANCIA_DIST) || (read_sonar(7) > distanciaIdeal + TOLERANCIA_DIST));	// sonares referentes ao lado direito do Uoli
+
+	// apos esse laco a parede deve estar posicionada a direita do Uoli
+
+	motor0->speed = VELOC_PAREDE;
+	motor1->speed = VELOC_PAREDE;
+	set_motor_speed(motor0);			// velocidade reajustada
+	set_motor_speed(motor1);			// para a velocidade padrao
 
 }
 
@@ -119,7 +159,7 @@ void _start() {
 	set_motor_speed(&motor1);
 
 	while (1) {
-		if (read_sonar(3) < LIMIAR) {
+		if (read_sonar(3) < LIMIAR || read_sonar(4) < LIMIAR) {
 			motor0.speed = 0;
 			motor1.speed = 0;
 			set_motor_speed(&motor0);

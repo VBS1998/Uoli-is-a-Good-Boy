@@ -250,7 +250,7 @@ svc_handler:
 			orr r1, r1, r0
 			ldr r0, =GPIO_DR
 			str r1, [r0]					@ GPIO_DR = r1
-											@ botar 1 no motor_write
+
 			mov r0, #0
 			b fim_setar_motor
 

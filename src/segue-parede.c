@@ -1,10 +1,10 @@
-/*
+
 #include "api_robot.h"
 
-#define LIMIAR 1200				// decidir bons valores para o
+#define LIMIAR 800				// decidir bons valores para o
 #define NORMALSPEED 30			// limiar, velocidade padrao,
-#define TOLERANCIA_DIST 2		// tolerancia da distancia a parede,
-#define VELOC_PAREDE 15			// e velocidade de seguir parede
+#define TOLERANCIA_DIST 10		// tolerancia da distancia a parede,
+#define VELOC_PAREDE 10			// e velocidade de seguir parede
 
 
 int acharSonarMaisProximo (int *array, int size);
@@ -25,7 +25,7 @@ void _start() {
 	set_motor_speed(&motor0);
 	set_motor_speed(&motor1);
 
-	while(read_sonar(3) > LIMIAR && read_sonar(4) > LIMIAR){
+	while(read_sonar(3) > LIMIAR && read_sonar(4) > LIMIAR) {
 		// Uoli deve andar reto ate encontrar uma parede
 	}
 
@@ -39,14 +39,14 @@ void ajustar_posicao(motor_cfg_t *motor0, motor_cfg_t *motor1, int *sonarDistanc
 
 	int closestSonar;
 
-	motor0->speed = 10;
+	motor0->speed = 5;
 	motor1->speed = 0;
 	set_motor_speed(motor0);			// velocidade ajustada para
 	set_motor_speed(motor1);			// curva a esquerda
 
 	do {
 		closestSonar = acharSonarMaisProximo(sonarDistances, 16);
-	} while ((closestSonar != 7) && (closestSonar != 8));	// sonares referentes ao lado direito do Uoli
+	} while (closestSonar != 7);	// sonares referentes ao lado direito do Uoli
 
 	// apos esse laco a parede deve estar posicionada a direita do Uoli
 
@@ -82,11 +82,11 @@ void seguir_parede(motor_cfg_t *motor0, motor_cfg_t *motor1, int *sonarDistances
 
 /*
  * retorna o indice do sonar mais proximo da parede.
- *
+ */
 int acharSonarMaisProximo (int *array, int size) {
 
-	int min = 4;
-	array[4] = read_sonar(4);
+	int min = 6;
+	array[6] = read_sonar(6);
 	for (int i = 4; i < 12; i++) {
 		array[i] = read_sonar(i);
 		if (array[i] < array[min]) {
@@ -97,10 +97,10 @@ int acharSonarMaisProximo (int *array, int size) {
 	return min;
 
 }
-*/
 
 
 
+/*
 #include "api_robot.h"
 
 #define VEL_RETO 60
@@ -128,7 +128,7 @@ void _start() {
 	}
 
 }
-
+*/
 
 /*
 #include "api_robot.h"
